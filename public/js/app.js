@@ -1,111 +1,120 @@
-const axios = require('axios');
+$(document).ready(function() {
+  // Charger les utilisateurs et les tâches lors du chargement de la page
+  loadUsers();
+  loadTasks();
+
+  // Lorsqu'un utilisateur est sélectionné
+  $('#selectUser').change(function() {
+    var selectedUser = $(this).val();
+    filterTasksByUser(selectedUser);
+  });
+
+  // Lorsqu'une tâche est créée
+  $('#createTaskBtn').click(function() {
+    var taskText = $('#taskText').val();
+    var taskCategory = $('#selectCategory').val();
+    var selectedUser = $('#selectUser').val();
+
+    if (taskText && taskCategory && selectedUser) {
+      createTask(taskText, taskCategory, selectedUser);
+      $('#taskText').val('');
+      $('#selectCategory').val('');
+    }
+  });
+});
 
 function loadUsers() {
-  axios.get('/user')
-    .then(response => {
-      const selectUsers = document.getElementById('selectUser');
-      selectUsers.innerHTML = '';
+  $.ajax({
+    url: '/user',
+    type: 'GET',
+    success: function(data) {
+      var selectUsers = $('#selectUser');
+      selectUsers.empty();
 
-      if (response.data.length > 0) {
-        const allUsersOption = document.createElement('option');
-        allUsersOption.value = '';
-        allUsersOption.textContent = 'Tous les utilisateurs';
-        selectUsers.appendChild(allUsersOption);
-
-        response.data.forEach(user => {
-          const option = document.createElement('option');
-          option.value = user.id;
-          option.textContent = user.name;
-          selectUsers.appendChild(option);
+      if (data.length > 0) {
+        selectUsers.append('<option value="">Tous les utilisateurs</option>');
+        $.each(data, function(index, user) {
+          selectUsers.append('<option value="' + user.id + '">' + user.name + '</option>');
         });
       } else {
-        const noUsersOption = document.createElement('option');
-        noUsersOption.value = '';
-        noUsersOption.textContent = 'Aucun utilisateur trouvé';
-        selectUsers.appendChild(noUsersOption);
+        selectUsers.append('<option value="">Aucun utilisateur trouvé</option>');
       }
-    })
-    .catch(error => {
+    },
+    error: function(error) {
       console.error('Erreur lors de la récupération des utilisateurs:', error);
-    });
+    }
+  });
 }
 
 function loadTasks() {
-  axios.get('/task')
-    .then(response => {
-      displayTasks(response.data);
-    })
-    .catch(error => {
+  $.ajax({
+    url: '/task',
+    type: 'GET',
+    success: function(data) {
+      displayTasks(data);
+    },
+    error: function(error) {
       console.error('Erreur lors de la récupération des tâches:', error);
-    });
+    }
+  });
 }
 
 function createTask(text, category, userId) {
-  const newTask = {
-    id: 'task' + Date.now(),
+  var newTask = {
+    id: 'task' + (new Date()).getTime(),
     userId: userId,
     text: text,
     category: category,
     done: false
   };
 
-  axios.post('/todos/create', newTask)
-    .then(() => {
+  $.ajax({
+    url: '/todos/create',
+    type: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify(newTask),
+    success: function() {
       loadTasks();
-    })
-    .catch(error => {
+    },
+    error: function(error) {
       console.error('Erreur lors de la création de la tâche:', error);
-    });
+    }
+  });
 }
 
 function filterTasksByUser(userId) {
   if (userId) {
-    axios.get('/task', { params: { userId: userId } })
-      .then(response => {
-        displayTasks(response.data);
-      })
-      .catch(error => {
+    $.ajax({
+      url: '/task?userId=' + userId,
+      type: 'GET',
+      success: function(data) {
+        displayTasks(data);
+      },
+      error: function(error) {
         console.error('Erreur lors de la récupération des tâches de l\'utilisateur:', error);
-      });
+      }
+    });
   } else {
     loadTasks();
   }
 }
 
 function displayTasks(tasks) {
-  const todoList = document.getElementById('todoList');
-  const doneList = document.getElementById('doneList');
-  todoList.innerHTML = '';
-  doneList.innerHTML = '';
+  var todoList = $('#todoList');
+  var doneList = $('#doneList');
+  todoList.empty();
+  doneList.empty();
 
-  tasks.forEach(task => {
-    const taskItem = document.createElement('li');
-    taskItem.classList.add('list-group-item');
-    const taskText = document.createElement('span');
-    taskText.textContent = task.text;
-    const taskCategory = document.createElement('span');
-    taskCategory.classList.add('badge');
-    taskCategory.textContent = task.category;
-    taskItem.appendChild(taskText);
-    taskItem.appendChild(taskCategory);
+  $.each(tasks, function(index, task) {
+    var taskItem = $('<li class="list-group-item"></li>');
+    var taskText = $('<span></span>').text(task.text);
+    var taskCategory = $('<span class="badge"></span>').text(task.category);
+    taskItem.append(taskText).append(taskCategory);
 
     if (task.done) {
-      doneList.appendChild(taskItem);
+      doneList.append(taskItem);
     } else {
-      todoList.appendChild(taskItem);
+      todoList.append(taskItem);
     }
   });
 }
-
-// Charger les utilisateurs et les tâches lors du démarrage du serveur
-loadUsers();
-loadTasks();
-
-// Exportez les fonctions si vous souhaitez les utiliser dans d'autres modules
-module.exports = {
-  loadUsers,
-  loadTasks,
-  createTask,
-  filterTasksByUser,
-  displayTasks
-};
