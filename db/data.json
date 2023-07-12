@@ -1,53 +1,40 @@
 {
-  "todos": [
+  "users": [
     {
-      "id": "indexTask1",
-      "txt": "faire la vaisselle",
-      "cat": "URGENT",
-      "done": false,
-      "idUtil": "indexUser1"
+      "id": "user1",
+      "name": "Utilisateur 1",
+      "tasks": [
+        {
+          "id": "task1",
+          "text": "Faire les courses",
+          "category": "urgent",
+          "done": false
+        },
+        {
+          "id": "task2",
+          "text": "Préparer le dîner",
+          "category": "normal",
+          "done": false
+        }
+      ]
     },
     {
-      "id": "indexTask2",
-      "text": "faire le ménage",
-      "prio": "PRIORITAIRE",
-      "done": false,
-      "idUtil": "indexUser2"
-    },
-    {
-      "id": "indexTask3",
-      "text": "brosser les chats",
-      "prio": "NORMALE",
-      "done": true,
-      "idUtil": "indexUser1"
-    },
-    {
-      "id": "indexTask4",
-      "text": "nourrir les chats",
-      "prio": "URGENT",
-      "done": false,
-      "idUtil": "indexUser3"
-    },
-    {
-      "txt": "dcxxx",
-      "cat": "urgent",
-      "id": "078c4de8-545c-4cc3-93f5-7946e46f6308",
-      "done": false
-    },
-    {
-      "txt": "dff",
-      "cat": "urgent",
-      "user": " indexUser1",
-      "id": "297a5f5a-a4b0-45df-a2f0-1d3949fae687",
-      "done": false
-    },
-    {
-      "id": "11df58da-c61a-43b0-b0c1-e4dc3d484800",
-      "done": false
-    },
-    {
-      "id": "24b8314d-7e30-4e36-be1f-914ae36f3ac1",
-      "done": false
+      "id": "user2",
+      "name": "Utilisateur 2",
+      "tasks": [
+        {
+          "id": "task3",
+          "text": "Répondre aux e-mails",
+          "category": "urgent",
+          "done": true
+        },
+        {
+          "id": "task4",
+          "text": "Planifier une réunion",
+          "category": "normal",
+          "done": false
+        }
+      ]
     }
   ]
 }
