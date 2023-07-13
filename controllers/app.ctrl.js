@@ -1,51 +1,53 @@
 const { resolve } = require('path');
 const { randomUUID } = require('crypto');
-
-// DECLARATIONS
-const { todos,users } = require('../db/data.json');
 const { writeFileSync } = require('fs');
+const data = require('../db/data.json');
 
 exports.homeCtrl = (req, res) => {
-  console.log(`homectrl`);
-  res.sendFile( resolve('public', 'home.html') );
+  res.sendFile(resolve('public', 'home.html'));
 };
-
-exports.servicesCtrl = (req, res) => {
-  // Connexion à la BDD
-  // Récupération des livres
-  // Vérification de la cnx
-  res.end('Services');
-};
-
-exports.contactCtrl = (req, res) => res.end('Contact');
 
 exports.postTask = (req, res) => {
-        const newTodo = req.body;
-        console.log(`req.body`,req);
-        newTodo.id = randomUUID();
-        console.log(`body`,newTodo);
-        newTodo.done = false;
-        todos.push(newTodo);
-        updateJSON();
-        res.redirect('/home');
-      };
+  const { text, category, userId } = req.body;
 
-      exports.usersCtrl = (req, res) => {
-        console.log("appel users ctrl");
-        console.log("users :", users);
-        //console.log('body :', req.body);
-        res.json(users);
-      };
-      
-      exports.tasksCtrl = (req, res) => {
-        console.log('tasksCtrl id :', req.params.id);
-        const filteredTasks = tasks.filter(t => t.idUtil == req.params.id);
-        res.json(filteredTasks);
-      }
-      
-function updateJSON() {
-    writeFileSync(
-      resolve('db', 'data.json'),
-      JSON.stringify({ todos }, null, 2)
-    );
+  const newTask = {
+    id: 'task' + new Date().getTime(),
+    text: text,
+    category: category,
+    done: false
+  };
+
+  const user = data.users.find(user => user.id === userId);
+
+  if (user) {
+    user.tasks.push(newTask);
+
+    writeFileSync('db/data.json', JSON.stringify(data, null, 2));
+
+    res.json(newTask);
+  } else {
+    res.status(404).json({ message: 'Utilisateur non trouvé' });
   }
+};
+
+exports.usersCtrl = (req, res) => {
+  res.json(data.users);
+};
+
+exports.tasksCtrl = (req, res) => {
+  let tasks = data.users.reduce((acc, user) => {
+    return acc.concat(user.tasks);
+  }, []);
+
+  const userId = req.query.userId;
+  if (userId) {
+    tasks = tasks.filter(task => task.userId === userId);
+  }
+
+  const category = req.query.category;
+  if (category) {
+    tasks = tasks.filter(task => task.category === category);
+  }
+
+  res.json(tasks);
+};

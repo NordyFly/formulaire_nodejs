@@ -5,21 +5,27 @@ $(document).ready(function() {
 
   // Lorsqu'un utilisateur est sélectionné
   $('#selectUser').change(function() {
-    var selectedUser = $(this).val();
+    let selectedUser = $(this).val();
     filterTasksByUser(selectedUser);
   });
 
   // Lorsqu'une tâche est créée
   $('#createTaskBtn').click(function() {
-    var taskText = $('#taskText').val();
-    var taskCategory = $('#selectCategory').val();
-    var selectedUser = $('#selectUser').val();
+    let taskText = $('#taskText').val();
+    let taskCategory = $('#selectCategory').val();
+    let selectedUser = $('#selectUser').val();
 
     if (taskText && taskCategory && selectedUser) {
       createTask(taskText, taskCategory, selectedUser);
       $('#taskText').val('');
       $('#selectCategory').val('');
     }
+  });
+
+  // Lorsqu'un filtre de catégorie est sélectionné
+  $('#selectCategory').change(function() {
+    let selectedCategory = $(this).val();
+    filterTasksByCategory(selectedCategory);
   });
 });
 
@@ -28,7 +34,7 @@ function loadUsers() {
     url: '/user',
     type: 'GET',
     success: function(data) {
-      var selectUsers = $('#selectUser');
+      let selectUsers = $('#selectUser');
       selectUsers.empty();
 
       if (data.length > 0) {
@@ -60,12 +66,12 @@ function loadTasks() {
 }
 
 function createTask(text, category, userId) {
-  var newTask = {
-    id: 'task' + (new Date()).getTime(),
-    userId: userId,
+  let newTask = {
+    id: 'task' + new Date().getTime(),
     text: text,
     category: category,
-    done: false
+    done: false,
+    userId: userId
   };
 
   $.ajax({
@@ -99,16 +105,33 @@ function filterTasksByUser(userId) {
   }
 }
 
+function filterTasksByCategory(category) {
+  if (category) {
+    $.ajax({
+      url: '/task?category=' + category,
+      type: 'GET',
+      success: function(data) {
+        displayTasks(data);
+      },
+      error: function(error) {
+        console.error('Erreur lors de la récupération des tâches de la catégorie:', error);
+      }
+    });
+  } else {
+    loadTasks();
+  }
+}
+
 function displayTasks(tasks) {
-  var todoList = $('#todoList');
-  var doneList = $('#doneList');
+  let todoList = $('#todoList');
+  let doneList = $('#doneList');
   todoList.empty();
   doneList.empty();
 
   $.each(tasks, function(index, task) {
-    var taskItem = $('<li class="list-group-item"></li>');
-    var taskText = $('<span></span>').text(task.text);
-    var taskCategory = $('<span class="badge"></span>').text(task.category);
+    let taskItem = $('<li class="list-group-item"></li>');
+    let taskText = $('<span></span>').text(task.text);
+    let taskCategory = $('<span class="badge"></span>').text(task.category);
     taskItem.append(taskText).append(taskCategory);
 
     if (task.done) {
